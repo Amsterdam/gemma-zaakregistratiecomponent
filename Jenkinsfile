@@ -54,7 +54,7 @@ if (BRANCH == "master") {
                 build job: 'Subtask_Openstack_Playbook',
                         parameters: [
                                 [$class: 'StringParameterValue', name: 'INVENTORY', value: 'acceptance'],
-                                [$class: 'StringParameterValue', name: 'PLAYBOOK', value: 'deploy-zaaktypecatalogus.yml'],
+                                [$class: 'StringParameterValue', name: 'PLAYBOOK', value: 'deploy-zaakregistratiecomponent.yml'],
                         ]
             }
         }
@@ -62,7 +62,7 @@ if (BRANCH == "master") {
 
 
     stage('Waiting for approval') {
-        slackSend channel: '#ci-channel-app', color: 'warning', message: 'zaakregistratie is waiting for Production Release - please confirm'
+        slackSend channel: '#ci-channel-app', color: 'warning', message: 'zaakregistratiecomponent is waiting for Production Release - please confirm'
         input "Deploy to Production?"
     }
 
@@ -83,7 +83,7 @@ if (BRANCH == "master") {
                 build job: 'Subtask_Openstack_Playbook',
                         parameters: [
                                 [$class: 'StringParameterValue', name: 'INVENTORY', value: 'production'],
-                                [$class: 'StringParameterValue', name: 'PLAYBOOK', value: 'deploy-zaakregistratie.yml'],
+                                [$class: 'StringParameterValue', name: 'PLAYBOOK', value: 'deploy-zaakregistratiecomponent.yml'],
                         ]
             }
         }
