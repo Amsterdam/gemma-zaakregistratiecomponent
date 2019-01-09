@@ -2,15 +2,18 @@ from django.test import override_settings
 
 from rest_framework import status
 from rest_framework.test import APITestCase
-from zds_schema.tests import get_validation_errors
+from zds_schema.tests import JWTScopesMixin, get_validation_errors
 from zds_schema.validators import URLValidator
 
 from zrc.datamodel.tests.factories import ZaakFactory
 
+from ..scopes import SCOPE_ZAKEN_ALLES_LEZEN, SCOPE_ZAKEN_CREATE
 from .utils import reverse
 
 
-class ZaakValidationTests(APITestCase):
+class ZaakValidationTests(JWTScopesMixin, APITestCase):
+
+    scopes = [SCOPE_ZAKEN_CREATE]
 
     @override_settings(LINK_FETCHER='zds_schema.mocks.link_fetcher_404')
     def test_validate_zaaktype_invalid(self):
@@ -19,7 +22,7 @@ class ZaakValidationTests(APITestCase):
         response = self.client.post(url, {
             'zaaktype': 'https://example.com/foo/bar',
             'bronorganisatie': '517439943',
-            'verantwoordelijkeOrganisatie': 'https://example.com/foo/bar',
+            'verantwoordelijkeOrganisatie': '517439943',
             'registratiedatum': '2018-06-11',
             'startdatum': '2018-06-11',
         }, HTTP_ACCEPT_CRS='EPSG:4326')
@@ -37,7 +40,7 @@ class ZaakValidationTests(APITestCase):
         response = self.client.post(url, {
             'zaaktype': 'https://example.com/foo/bar',
             'bronorganisatie': '517439943',
-            'verantwoordelijkeOrganisatie': 'https://example.com/foo/bar',
+            'verantwoordelijkeOrganisatie': '517439943',
             'registratiedatum': '2018-06-11',
             'startdatum': '2018-06-11',
         }, HTTP_ACCEPT_CRS='EPSG:4326')
@@ -58,7 +61,9 @@ class ZaakValidationTests(APITestCase):
         self.assertIsNotNone(good_casing)
 
 
-class ZaakInformatieObjectValidationTests(APITestCase):
+class ZaakInformatieObjectValidationTests(JWTScopesMixin, APITestCase):
+
+    scopes = [SCOPE_ZAKEN_CREATE]
 
     @override_settings(
         LINK_FETCHER='zds_schema.mocks.link_fetcher_404',
@@ -75,3 +80,55 @@ class ZaakInformatieObjectValidationTests(APITestCase):
         validation_error = get_validation_errors(response, 'informatieobject')
         self.assertEqual(validation_error['code'], URLValidator.code)
         self.assertEqual(validation_error['name'], 'informatieobject')
+
+
+class FilterValidationTests(JWTScopesMixin, APITestCase):
+    """
+    Test that incorrect filter usage results in HTTP 400.
+    """
+
+    scopes = [SCOPE_ZAKEN_ALLES_LEZEN]
+
+    def test_zaak_invalid_filters(self):
+        url = reverse('zaak-list')
+
+        invalid_filters = {
+            'zaaktype': '123',
+            'bronorganisatie': '123',
+            'foo': 'bar',
+        }
+
+        for key, value in invalid_filters.items():
+            with self.subTest(query_param=key, value=value):
+                response = self.client.get(url, {key: value}, HTTP_ACCEPT_CRS='EPSG:4326')
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_rol_invalid_filters(self):
+        url = reverse('rol-list')
+
+        invalid_filters = {
+            'zaak': '123',  # must be a url
+            'betrokkene': '123',  # must be a url
+            'betrokkeneType': 'not-a-valid-choice',  # must be a pre-defined choice
+            'rolomschrijving': 'not-a-valid-choice',  # must be a pre-defined choice
+            'foo': 'bar',
+        }
+
+        for key, value in invalid_filters.items():
+            with self.subTest(query_param=key, value=value):
+                response = self.client.get(url, {key: value})
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_status_invalid_filters(self):
+        url = reverse('status-list')
+
+        invalid_filters = {
+            'zaak': '123',  # must be a url
+            'statusType': '123',  # must be a url
+            'foo': 'bar',
+        }
+
+        for key, value in invalid_filters.items():
+            with self.subTest(query_param=key, value=value):
+                response = self.client.get(url, {key: value})
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
