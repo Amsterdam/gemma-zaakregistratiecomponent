@@ -7,8 +7,11 @@ from django.test import override_settings
 
 from rest_framework import status
 from rest_framework.test import APITestCase
-from zds_schema.tests import get_operation_url, get_validation_errors
+from zds_schema.tests import (
+    JWTScopesMixin, get_operation_url, get_validation_errors
+)
 
+from zrc.api.scopes import SCOPE_ZAKEN_CREATE
 from zrc.datamodel.models import KlantContact, Rol, Status, Zaak, ZaakObject
 from zrc.datamodel.tests.factories import ZaakFactory
 
@@ -17,7 +20,7 @@ from .utils import isodatetime
 ZAAKTYPE = 'https://example.com/ztc/api/v1/catalogus/1/zaaktypen/1'
 STATUS_TYPE = 'https://example.com/ztc/api/v1/catalogus/1/zaaktypen/1/statustypen/1'
 STATUS_TYPE_OVERLAST_GECONSTATEERD = 'https://example.com/ztc/api/v1/catalogus/1/zaaktypen/1/statustypen/2'
-VERANTWOORDELIJKE_ORGANISATIE = 'https://www.example.com/orc/api/v1/rsgb/nietnatuurlijkepersonen/1234'
+VERANTWOORDELIJKE_ORGANISATIE = '517439943'
 OBJECT_MET_ADRES = 'https://example.com/orc/api/v1/objecten/1'
 FOTO = 'https://example.com/drc/api/v1/enkelvoudiginformatieobjecten/1'
 # file:///home/bbt/Downloads/2a.aansluitspecificatieskennisgevingen-gegevenswoordenboek-entiteitenv1.0.6.pdf
@@ -26,7 +29,9 @@ STADSDEEL = 'https://example.com/rsgb/api/v1/wijkobjecten/1'
 
 
 @override_settings(LINK_FETCHER='zds_schema.mocks.link_fetcher_200')
-class US39TestCase(APITestCase):
+class US39TestCase(JWTScopesMixin, APITestCase):
+
+    scopes = [SCOPE_ZAKEN_CREATE]
 
     def test_create_zaak(self):
         """

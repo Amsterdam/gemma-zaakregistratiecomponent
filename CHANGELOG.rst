@@ -2,6 +2,92 @@
 Wijzigingen
 ===========
 
+0.8.6 (2018-12-13)
+==================
+
+Bump Django and urllib
+
+* urllib3<=1.22 has a CVE
+* use latest patch release of Django 2.0
+
+0.8.5 (2018-12-11)
+==================
+
+Small bugfixes
+
+* Fixed validator using newer gemma-zds-client
+* Added a name for the session cookie to preserve sessions on the same domain
+  between components.
+* Added missing Api-Version header
+* Added missing Location header to OAS
+
+
+0.8.2 (2018-12-04)
+==================
+
+Client method signature fixed
+
+0.8.1 (2018-12-03)
+==================
+
+Refs. #565 -- change URL reference to RSIN
+
+0.8.0 (2018-11-27)
+==================
+
+Stap naar volwassenere API
+
+* Update naar recente zds-schema versie
+* HTTP 400 errors op onbekende/invalide filter-parameters
+* Docker container beter te customizen via environment variables
+
+Breaking change
+---------------
+
+De ``Authorization`` headers is veranderd van formaat. In plaats van ``<jwt>``
+is het nu ``Bearer <jwt>`` geworden.
+
+0.7.1 (2018-11-22)
+==================
+
+DSO API-srategie fix
+
+Foutberichten bevatten een `type` key. De waarde van deze key begint niet
+langer incorrect met `"URI: "`.
+
+0.7.0 (2018-11-21)
+==================
+
+Autorisatie-feature release
+
+* Scopes toegevoegd: ``ZAKEN_CREATE``, ``STATUSSEN_TOEVOEGEN``, ``ZAKEN_ALLES_LEZEN``
+* Autorisatie-informatie toegevoegd aan API spec
+* Auth/Autz via middleware en JWT toegevoegd
+* Documentatie van scopes toegevoegd op ``http://localhost:8000/ref/scopes/``
+* Maak authenticated calls naar ZTC
+* JWT client/secret management toegevoegd
+
+Breaking changes
+----------------
+
+Door autorisatie toe te voegen zijn bestaande endpoints niet langer functioneel
+zonder een geldige ``Authentication`` header. Je kan de `token issuer`_ gebruiken
+om geldige credentials te verkrijgen.
+
+Kleine wijzigingen
+------------------
+
+* dwing gebruik van timeze-aware datetimes af (hard error in dev)
+* OAS 3.0 versie wordt nu geserveerd vanaf ``/api/v1/schema/openapi.yaml?v=3``.
+  Zonder ``?v=3`` querystring krijg je nog steeds Swagger 2.0.
+
+.. _token issuer: https://ref.tst.vng.cloud/tokens/
+
+0.6.1 (2018-11-16)
+==================
+
+Added CORS-headers
+
 0.6.0 (2018-11-01)
 ==================
 

@@ -53,11 +53,13 @@ INSTALLED_APPS = [
     # External applications.
     'axes',
     'django_filters',
+    'corsheaders',
     'zds_schema',  # before drf_yasg to override the management command
     'drf_yasg',
     'rest_framework',
     'rest_framework_gis',
     'rest_framework_filters',
+    'django_markup',
 
     # Project applications.
     'zrc.accounts',
@@ -73,8 +75,12 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'zds_schema.middleware.AuthMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'corsheaders.middleware.CorsMiddleware',
+    'zds_schema.middleware.APIVersionHeaderMiddleware',
 ]
 
 ROOT_URLCONF = 'zrc.urls'
@@ -160,6 +166,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 # Additional locations of static files
 STATICFILES_DIRS = (
     os.path.join(DJANGO_PROJECT_DIR, 'static'),
+    os.path.join(BASE_DIR, 'node_modules', 'font-awesome'),
 )
 
 # List of finder classes that know how to find static files in
@@ -277,6 +284,8 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend'
 ]
 
+SESSION_COOKIE_NAME = 'zrc_sessionid'
+
 #
 # Custom settings
 #
@@ -306,6 +315,23 @@ HIJACK_REGISTER_ADMIN = False
 # This is a CSRF-security risk.
 # See: http://django-hijack.readthedocs.io/en/latest/configuration/#allowing-get-method-for-hijack-views
 HIJACK_ALLOW_GET_REQUESTS = True
+
+# Django-CORS-middleware
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_HEADERS = (
+    'x-requested-with',
+    'content-type',
+    'accept',
+    'origin',
+    'authorization',
+    'x-csrftoken',
+    'user-agent',
+    'accept-encoding',
+
+    'accept-crs',
+    'content-crs',
+)
+
 
 # Raven
 SENTRY_DSN = os.getenv('SENTRY_DSN')
